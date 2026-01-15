@@ -1,0 +1,4 @@
+name = "bind_RBM"
+uuid = "b654bff8-ca72-46a9-9ffa-e55dbf73f8c2"
+authors = ["JacopoBoccato <jacopo.boccato@gmail.com>"]
+version = "0.1.0"
