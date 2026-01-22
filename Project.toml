@@ -2,3 +2,27 @@ name = "bind_RBM"
 uuid = "b654bff8-ca72-46a9-9ffa-e55dbf73f8c2"
 authors = ["JacopoBoccato <jacopo.boccato@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
+MLJLinearModels = "6ee0df7b-362f-4a72-a706-9e79364fb692"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
+RestrictedBoltzmannMachines = "12e6b396-7db5-4506-8cb6-664a4fe1e50e"
+SequenceLogos = "7a3f67ce-6eeb-4904-9da4-2cbd106a5944"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
+
+[compat]
+CairoMakie = "0.15.8"
+DataFrames = "1.8.1"
+JLD2 = "0.6.3"
+MLJ = "0.22.0"
+MLJLinearModels = "0.10.1"
+Makie = "0.24.8"
+MultivariateStats = "0.10.3"
+RestrictedBoltzmannMachines = "5.1.1"
+SequenceLogos = "0.2.1"
+XLSX = "0.10.4"
