@@ -88,7 +88,8 @@ function train_svm_gaussian_cv(
                 _, decision_scores = svmpredict(model, X_val')
                 
                 # Compute ROC-AUC
-                auc = compute_roc_auc(y_val_binary, vec(decision_scores))
+                pos = findfirst(==(1.0), model.labels)          # index of +1 class
+                auc = compute_roc_auc(y_val_binary, vec(decision_scores[pos, :]))
                 push!(fold_aucs, auc)
             end
             
@@ -266,5 +267,5 @@ Get decision scores for new data using trained SVM model.
 """
 function predict_scores(model, X::Matrix{Float64})
     _, scores = svmpredict(model, X')
-    return vec(scores)
+    return vec(scores[:, 2])
 end

@@ -242,3 +242,132 @@ function score_strings(file_content::String, strings::Vector{String})
     
     return results
 end
+
+"""
+    best_strings_per_class(file_content::String, strings::Vector{String})
+
+Returns, for each class, all strings that achieve the maximum score for that class.
+
+Output:
+- best::Dict{String, Vector{String}}  (class_name => strings with max score)
+- best_score::Dict{String, Float64}  (class_name => max score)
+"""
+function best_strings_per_class(file_content::String, strings::Vector{String})
+    classes = parse_rules_file(file_content)
+    class_names = sort(collect(keys(classes)))
+
+    scores_dict = score_strings(file_content, strings)
+
+    best = Dict{String, Vector{String}}()
+    best_score = Dict{String, Float64}()
+
+    for (i, class_name) in enumerate(class_names)
+        maxval = -Inf
+        winners = String[]
+
+        for s in strings
+            sc = scores_dict[s][i]
+            if sc > maxval
+                maxval = sc
+                empty!(winners)
+                push!(winners, s)
+            elseif sc == maxval
+                push!(winners, s)
+            end
+        end
+
+        best[class_name] = winners
+        best_score[class_name] = maxval
+    end
+
+    return best, best_score
+end
+"""
+    collect_key_label_hits_per_class(best_out, data; matchfun=occursin)
+
+Inputs:
+- best_out = (best, best_score) from `best_strings_per_class`
+    best[class] = Vector of winning strings for that class
+- data[key] = (elements::Vector{String}, labels::Vector{Int})
+
+For each class:
+- scan all keys in `data`
+- for each element index j:
+    if any winning string matches elements[j] (default: substring via occursin)
+        push key and labels[j]
+        (repeats if it matches multiple times)
+
+Returns:
+- indexed::NamedTuple with:
+    class_names::Vector{String}
+    class_to_idx::Dict{String,Int}
+    keys_by_class::Vector{Vector{String}}
+    labels_by_class::Vector{Vector{Int}}
+    best_score::Dict{String,Float64}
+- by_class::Dict{String, NamedTuple{(:keys,:labels),Tuple{Vector{String},Vector{Int}}}}
+  (a convenience view if you prefer name-based access)
+"""
+function collect_key_label_hits_per_class(
+    best_out::Tuple{
+        Dict{String, Vector{String}},
+        Dict{String, Float64}
+    },
+    data::Dict{String, NamedTuple{(:elements,:labels), Tuple{Vector{String}, Vector{Int}}}};
+    matchfun = occursin,  # call as matchfun(winner, element)
+)
+    best, best_score = best_out
+
+    # Stable ordering => easy indexing across your 16 classes
+    class_names  = sort(collect(keys(best)))
+    class_to_idx = Dict(c => i for (i, c) in enumerate(class_names))
+    n = length(class_names)
+
+    keys_by_class   = [String[] for _ in 1:n]
+    labels_by_class = [Int[]    for _ in 1:n]
+
+    for (i, class_name) in enumerate(class_names)
+        winners = best[class_name]
+        kvec = keys_by_class[i]
+        lvec = labels_by_class[i]
+
+        # scan entire dataset
+        for (key, nt) in data
+            elems = nt.elements
+            labs  = nt.labels
+
+            @inbounds for j in eachindex(elems)
+                e = elems[j]
+
+                # does e match any winner?
+                hit = false
+                for w in winners
+                    if matchfun(w, e)
+                        hit = true
+                        break
+                    end
+                end
+
+                if hit
+                    push!(kvec, key)     # <-- return dataset KEY
+                    push!(lvec, labs[j]) # <-- label aligned with that element
+                end
+            end
+        end
+    end
+
+    # Optional convenience view (by class name)
+    by_class = Dict{String, NamedTuple{(:keys,:labels),Tuple{Vector{String},Vector{Int}}}}()
+    for (i, c) in enumerate(class_names)
+        by_class[c] = (keys = keys_by_class[i], labels = labels_by_class[i])
+    end
+
+    indexed = (
+        class_names     = class_names,
+        class_to_idx    = class_to_idx,
+        keys_by_class   = keys_by_class,
+        labels_by_class = labels_by_class,
+        best_score      = best_score
+    )
+
+    return indexed, by_class
+end

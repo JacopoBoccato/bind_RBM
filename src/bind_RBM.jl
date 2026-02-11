@@ -11,6 +11,8 @@ using MLJ
 using Optim
 using DataFrames: DataFrame, nrow
 using CairoMakie
+using SequenceLogos
+using PyPlot
 const split_idx = 81                     # PDZ length in positions inside the concatenated string
 const ALPHABET = "ACDEFGHIKLMNPQRSTVWY-"
 const alphabet = collect(ALPHABET)
