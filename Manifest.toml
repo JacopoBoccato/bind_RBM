@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "ff0de15b64a41871908201cc07885f49a96a66be"
+project_hash = "074563d00861c3f1a9db530b9a3c46f233477a08"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -1298,6 +1298,18 @@ git-tree-sha1 = "aaafe88dccbd957a8d82f7d05be9b69172e0cee3"
 uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
 version = "4.0.1+0"
 
+[[deps.LIBLINEAR]]
+deps = ["Libdl", "SparseArrays", "liblinear_jll"]
+git-tree-sha1 = "2cd424d3bf9b36098009df5b1f399614c12b2ee4"
+uuid = "2d691ee1-e668-5016-a719-b2531b85e0f5"
+version = "0.7.1"
+
+[[deps.LIBSVM]]
+deps = ["LIBLINEAR", "LinearAlgebra", "ScikitLearnBase", "SparseArrays", "libsvm_jll"]
+git-tree-sha1 = "9016c6032aac779b13bbd1b3ce997606a6eb7a2b"
+uuid = "b1bec4e5-fd48-53fe-b0cb-9723c09d164b"
+version = "0.8.1"
+
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "eb62a3deb62fc6d8822c0c4bef73e4412419c5d8"
@@ -2216,6 +2228,12 @@ git-tree-sha1 = "a8e18eb383b5ecf1b5e6fc237eb39255044fd92b"
 uuid = "30f210dd-8aff-4c5f-94ba-8e64358c1161"
 version = "3.0.0"
 
+[[deps.ScikitLearnBase]]
+deps = ["LinearAlgebra", "Random", "Statistics"]
+git-tree-sha1 = "7877e55c1523a4b336b433da39c8e8c08d2f221f"
+uuid = "6e75b9c4-186b-50bd-896f-2d2496a4843e"
+version = "0.5.0"
+
 [[deps.ScopedValues]]
 deps = ["HashArrayMappedTries", "Logging"]
 git-tree-sha1 = "c3b2323466378a2ba15bea4b2f73b081e022f473"
@@ -2859,7 +2877,7 @@ uuid = "700de1a5-db45-46bc-99cf-38207098b444"
 version = "0.2.7"
 
 [[deps.bind_RBM]]
-deps = ["AdvRBMs", "CairoMakie", "Clustering", "DataFrames", "Dates", "DelimitedFiles", "Distances", "Flux", "IJulia", "JLD2", "LinearAlgebra", "MLJ", "MLJLinearModels", "Makie", "MultivariateStats", "Optim", "Printf", "Random", "RestrictedBoltzmannMachines", "SequenceLogos", "Serialization", "SparseArrays", "Statistics", "StatsPlots", "XLSX"]
+deps = ["AdvRBMs", "CairoMakie", "Clustering", "DataFrames", "Dates", "DelimitedFiles", "Distances", "Flux", "IJulia", "JLD2", "LIBSVM", "LinearAlgebra", "MLJ", "MLJLinearModels", "Makie", "Measures", "MultivariateStats", "Optim", "Printf", "Random", "RestrictedBoltzmannMachines", "SequenceLogos", "Serialization", "SparseArrays", "Statistics", "StatsPlots", "XLSX"]
 path = "."
 uuid = "b654bff8-ca72-46a9-9ffa-e55dbf73f8c2"
 version = "0.1.0"
@@ -2923,6 +2941,12 @@ git-tree-sha1 = "91d05d7f4a9f67205bd6cf395e488009fe85b499"
 uuid = "36db933b-70db-51c0-b978-0f229ee0e533"
 version = "1.28.1+0"
 
+[[deps.liblinear_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "7f5f1953394b74739eaebd345f4515515a022a5b"
+uuid = "275f1f90-abd2-5ca1-9ad8-abd4e3d66eb7"
+version = "2.47.0+0"
+
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
 git-tree-sha1 = "6ab498eaf50e0495f89e7a5b582816e2efb95f64"
@@ -2940,6 +2964,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "011b0a7331b41c25524b64dc42afc9683ee89026"
 uuid = "a9144af2-ca23-56d9-984f-0d03f7b5ccf8"
 version = "1.0.21+0"
+
+[[deps.libsvm_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "LLVMOpenMP_jll", "Libdl", "Pkg"]
+git-tree-sha1 = "7625dde5e9eab416c1cb791627f065ce55297eff"
+uuid = "08558c22-525a-5d2a-acf6-0ac6658ffce4"
+version = "3.25.0+0"
 
 [[deps.libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll"]

@@ -279,3 +279,20 @@ function onehot_encode_2d(elements::Vector{String}, alphabet::Vector{Char}, char
     
     return one_hot
 end
+
+function assign_classes_to_elements(data::Dict, add_class::Function)
+    # Collect all unique elements across all entries
+    all_elements = String[]
+    for (_, value) in data
+        append!(all_elements, value.elements)
+    end
+    unique_elements = unique(all_elements)
+    
+    # Create a dictionary with unique elements as keys and their class vectors as values
+    result = Dict{String, Vector{<:Number}}()
+    for element in unique_elements
+        result[element] = add_class(element)
+    end
+    
+    return result
+end
