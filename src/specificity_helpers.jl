@@ -232,6 +232,187 @@ function compute_metrics(y_true::Vector, y_pred::Vector)
     )
 end
 
+"""
+Evaluate a trained binary linear model on an external dataset.
+
+Arguments:
+- model: NamedTuple with fields `status`, `w`, `b` (as produced in notebooks)
+- keys: Vector{String} input sequences
+- labels: Vector{Int} or {Bool} with 0/1 labels
+- alphabet: alphabet used during training
+- char_to_index: mapping from Char to index used for one-hot encoding
+
+Returns:
+- NamedTuple with predictions, confusion-matrix metrics, and AUC
+"""
+function evaluate_linear_model_on_dataset(
+    model::NamedTuple,
+    keys::Vector{String},
+    labels::Vector,
+    alphabet::Vector{Char},
+    char_to_index::Dict{Char,Int};
+    threshold::Float64=0.5
+)
+    @assert !isempty(keys) "keys cannot be empty"
+    @assert length(keys) == length(labels) "keys and labels must have same length"
+    @assert all(v -> (v == 0 || v == 1 || v == false || v == true), labels) "labels must be binary (0/1 or Bool)"
+    @assert get(model, :status, :missing_status) == :ok "model status must be :ok"
+
+    y_true = Int.(labels)
+    X = Float64.(onehot_encode_2d(keys, alphabet, char_to_index))  # (D, N)
+    D, N = size(X)
+    @assert N == length(y_true) "encoded sample count mismatch"
+    @assert length(model.w) == D "model.w length ($(length(model.w))) does not match encoded dimension ($D)"
+
+    probs = vec(1.0 ./ (1.0 .+ exp.(-(model.w' * X .+ model.b))))
+    y_pred = Int.(probs .>= threshold)
+
+    metrics = compute_metrics(y_true, y_pred)
+    auc = compute_auc(y_true, Float32.(probs))
+
+    return (
+        n = N,
+        threshold = threshold,
+        positive = sum(y_true),
+        negative = N - sum(y_true),
+        probs = probs,
+        preds = y_pred,
+        auc = auc,
+        TP = metrics.TP,
+        TN = metrics.TN,
+        FP = metrics.FP,
+        FN = metrics.FN,
+        accuracy = metrics.accuracy,
+        precision = metrics.precision,
+        recall = metrics.recall,
+        specificity = metrics.specificity,
+        f1 = metrics.f1
+    )
+end
+
+"""
+Evaluate a dictionary of trained linear models on another indexed dataset.
+
+Arguments:
+- models_by_class: Dict{String,<:Any}, as returned by notebook training
+- indexed: NamedTuple with fields class_names, keys_by_class, labels_by_class
+- alphabet: alphabet used during training
+- char_to_index: mapping from Char to index used for one-hot encoding
+
+Returns:
+- (by_class=Dict, overall=NamedTuple, macro=NamedTuple)
+"""
+function evaluate_linear_models_by_class(
+    models_by_class::Dict{String,<:Any},
+    indexed::NamedTuple,
+    alphabet::Vector{Char},
+    char_to_index::Dict{Char,Int};
+    threshold::Float64=0.5,
+    verbose::Bool=true
+)
+    class_names = indexed.class_names
+    keys_by_class = indexed.keys_by_class
+    labels_by_class = indexed.labels_by_class
+
+    by_class = Dict{String,Any}()
+
+    total_tp = 0
+    total_tn = 0
+    total_fp = 0
+    total_fn = 0
+    n_evaluated = 0
+
+    acc_vals = Float64[]
+    prec_vals = Float64[]
+    rec_vals = Float64[]
+    spec_vals = Float64[]
+    f1_vals = Float64[]
+    auc_vals = Float64[]
+
+    for i in eachindex(class_names)
+        cname = class_names[i]
+        keys = keys_by_class[i]
+        labels = labels_by_class[i]
+
+        if isempty(keys)
+            by_class[cname] = (status=:empty_dataset, n=0)
+            continue
+        end
+
+        model = get(models_by_class, cname, (status=:missing_model,))
+        if !(model isa NamedTuple) || get(model, :status, :missing_status) != :ok
+            by_class[cname] = (status=get(model, :status, :missing_model), n=length(keys))
+            continue
+        end
+
+        res = evaluate_linear_model_on_dataset(
+            model,
+            keys,
+            labels,
+            alphabet,
+            char_to_index;
+            threshold=threshold
+        )
+
+        by_class[cname] = merge((status=:ok, class_name=cname), res)
+
+        total_tp += res.TP
+        total_tn += res.TN
+        total_fp += res.FP
+        total_fn += res.FN
+        n_evaluated += 1
+
+        push!(acc_vals, res.accuracy)
+        push!(prec_vals, res.precision)
+        push!(rec_vals, res.recall)
+        push!(spec_vals, res.specificity)
+        push!(f1_vals, res.f1)
+        if !isnan(res.auc)
+            push!(auc_vals, res.auc)
+        end
+    end
+
+    total_n = total_tp + total_tn + total_fp + total_fn
+    overall = (
+        n_classes_evaluated = n_evaluated,
+        n_samples = total_n,
+        TP = total_tp,
+        TN = total_tn,
+        FP = total_fp,
+        FN = total_fn,
+        accuracy = total_n == 0 ? NaN : (total_tp + total_tn) / total_n,
+        precision = total_tp / max(total_tp + total_fp, 1),
+        recall = total_tp / max(total_tp + total_fn, 1),
+        specificity = total_tn / max(total_tn + total_fp, 1),
+        f1 = begin
+            p = total_tp / max(total_tp + total_fp, 1)
+            r = total_tp / max(total_tp + total_fn, 1)
+            2 * p * r / max(p + r, 1e-10)
+        end
+    )
+
+    macro_metrics = (
+        n_classes = n_evaluated,
+        accuracy = isempty(acc_vals) ? NaN : mean(acc_vals),
+        precision = isempty(prec_vals) ? NaN : mean(prec_vals),
+        recall = isempty(rec_vals) ? NaN : mean(rec_vals),
+        specificity = isempty(spec_vals) ? NaN : mean(spec_vals),
+        f1 = isempty(f1_vals) ? NaN : mean(f1_vals),
+        auc = isempty(auc_vals) ? NaN : mean(auc_vals)
+    )
+
+    if verbose
+        println("Linear model evaluation summary")
+        println("  Classes evaluated: ", overall.n_classes_evaluated)
+        println("  Total samples:     ", overall.n_samples)
+        println("  Overall accuracy:  ", fmt4(overall.accuracy))
+        println("  Overall F1:        ", fmt4(overall.f1))
+        println("  Macro AUC:         ", fmt4(macro_metrics.auc))
+    end
+
+    return NamedTuple{(:by_class, :overall, :macro)}((by_class, overall, macro_metrics))
+end
+
 function prepare_data_from_dict(data::Dict{String, <:NamedTuple})
     pdz_sequences = String[]
     peptide_sequences = String[]

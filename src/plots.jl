@@ -193,10 +193,10 @@ end
 ##################
 # Sequence logo plotting functions   
 ##################
+function make_colorfun(colorscheme::Symbol,
+                       custom_colors::AbstractDict{Char,<:Any}=Dict{Char,Any}())
 
-function make_colorfun(colorscheme::Symbol, custom_colors::Dict{Char,Any})
-
-    aminoacid_colors = Dict(
+    aminoacid_colors = Dict{Char,Any}(
         'A' => "orange", 'V' => "orange", 'L' => "orange",
         'I' => "orange", 'M' => "orange",
         'F' => "green",  'Y' => "green",  'W' => "green",
@@ -209,7 +209,7 @@ function make_colorfun(colorscheme::Symbol, custom_colors::Dict{Char,Any})
         'P' => "magenta"
     )
 
-    nucleotide_colors = Dict(
+    nucleotide_colors = Dict{Char,Any}(
         'A' => "green",
         'C' => "blue",
         'G' => "orange",
@@ -220,34 +220,45 @@ function make_colorfun(colorscheme::Symbol, custom_colors::Dict{Char,Any})
     cmap =
         colorscheme === :aminoacid  ? aminoacid_colors :
         colorscheme === :nucleotide ? nucleotide_colors :
-        colorscheme === :custom     ? custom_colors :
+        colorscheme === :custom     ? Dict{Char,Any}(custom_colors) :
+        colorscheme === :default    ? nothing :  # handled below
         nothing
 
+    # IMPORTANT: SequenceLogos.plot_sequence_logo needs *some* color_fun.
     if cmap === nothing
-        return nothing
+        return c -> "black"  # “default”: just draw everything black
     end
 
     return c -> get(cmap, c, "black")
 end
+
 
 function plot_matrix_logo(
     matrix::AbstractMatrix,
     alphabet::AbstractVector;
     figsize::Tuple{Real,Real} = (12, 4),
     colorscheme::Symbol = :default,
-    custom_colors::Dict{Char,Any} = Dict{Char,Any}(),
+    custom_colors::AbstractDict{Char,<:Any} = Dict{Char,Any}(),
+    allow_negative::Bool = true,
     kwargs...
 )
     n_symbols, n_positions = size(matrix)
 
-    logo_sites = SequenceLogos.SequenceLogoSite[]
+    @assert length(alphabet) == n_symbols "alphabet length must match matrix rows"
+    @assert all(isfinite, matrix) "matrix contains NaN/Inf (this can hang plotting)"
+    if !allow_negative
+        @assert all(matrix .>= 0) "negative weights present; set allow_negative=true or preprocess"
+    end
 
+    logo_sites = SequenceLogos.SequenceLogoSite[]
     for pos in 1:n_positions
         letters = SequenceLogos.WeightedLetter[]
         for (i, sym) in enumerate(alphabet)
-            letter = sym isa AbstractString ? first(sym) : sym
-            push!(letters,
-                  SequenceLogos.WeightedLetter(letter, Float64(matrix[i, pos])))
+            letter = sym isa AbstractString ? first(sym) :
+                     sym isa Char           ? sym :
+                     sym isa Symbol         ? first(String(sym)) :
+                     throw(ArgumentError("alphabet element $sym cannot be converted to Char"))
+            push!(letters, SequenceLogos.WeightedLetter(letter, Float64(matrix[i, pos])))
         end
         push!(logo_sites, SequenceLogos.SequenceLogoSite(letters))
     end
@@ -257,15 +268,11 @@ function plot_matrix_logo(
     PyPlot.figure(figsize=figsize)
 
     colorfun = make_colorfun(colorscheme, custom_colors)
-
-    if colorfun === nothing
-        SequenceLogos.plot_sequence_logo_nt(logo; kwargs...)
-    else
-        SequenceLogos.plot_sequence_logo(logo, colorfun; kwargs...)
-    end
+    SequenceLogos.plot_sequence_logo(logo, colorfun; kwargs...)  # ALWAYS pass colorfun
 
     return PyPlot.gcf()
 end
+
 #####################################
 # Functions to plot energy and binding profile evolution
 #####################################

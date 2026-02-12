@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "2a635f73c9d5224eef8de02c0167a89a87a20cbb"
+project_hash = "aa3ff92d497f73f8386e9f0f080ff04a244563c6"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -2877,7 +2877,7 @@ uuid = "700de1a5-db45-46bc-99cf-38207098b444"
 version = "0.2.7"
 
 [[deps.bind_RBM]]
-deps = ["AdvRBMs", "CairoMakie", "Clustering", "DataFrames", "Dates", "DelimitedFiles", "Distances", "Flux", "IJulia", "JLD2", "LIBSVM", "LinearAlgebra", "MLJ", "MLJLinearModels", "Makie", "Measures", "MultivariateStats", "Optim", "Printf", "Random", "RestrictedBoltzmannMachines", "SequenceLogos", "Serialization", "SparseArrays", "Statistics", "StatsPlots", "XLSX"]
+deps = ["AdvRBMs", "CairoMakie", "Clustering", "DataFrames", "Dates", "DelimitedFiles", "Distances", "Flux", "IJulia", "JLD2", "LIBSVM", "LinearAlgebra", "MLJ", "MLJLinearModels", "Makie", "Measures", "MultivariateStats", "Optim", "Pango_jll", "Printf", "PyCall", "PyPlot", "Random", "RestrictedBoltzmannMachines", "SequenceLogos", "Serialization", "SparseArrays", "Statistics", "StatsPlots", "XLSX"]
 path = "."
 uuid = "b654bff8-ca72-46a9-9ffa-e55dbf73f8c2"
 version = "0.1.0"
