@@ -227,6 +227,36 @@ function create_binding_dictionary_Gogl(
     return data
 end
 
+function threshold_transform_binding(
+    D::Dict{String, <:NamedTuple},
+    threshold::Real
+)
+    out = Dict{String, NamedTuple{(:elements,:labels),Tuple{Vector{String},Vector{Int}}}}()
+
+    for (k, nt) in D
+        elems = nt.elements
+        labs  = nt.labels
+
+        newlabs = Vector{Int}(undef, length(labs))
+        @inbounds for i in eachindex(labs)
+            v = labs[i]
+            if v == -1
+                newlabs[i] = 0
+            elseif v == 0
+                newlabs[i] = 0
+            elseif v < threshold
+                newlabs[i] = 1
+            else
+                newlabs[i] = v
+            end
+        end
+
+        out[k] = (elements = copy(elems), labels = newlabs)
+    end
+
+    return out
+end
+
 function read_binding_file(filepath::String)
     open(filepath, "r") do io
         col2, col4, col5_binary = String[], String[], Int[]
@@ -295,4 +325,40 @@ function assign_classes_to_elements(data::Dict, add_class::Function)
     end
     
     return result
+end
+
+
+function zero_to_target_nonzero!(A::AbstractMatrix{<:AbstractFloat}, pct_nonzero::Real)
+    n = length(A)
+    n == 0 && return A, NaN, NaN
+
+    # accept either fraction (0..1) or percent (0..100)
+    f = pct_nonzero > 1 ? pct_nonzero / 100 : pct_nonzero
+    f = clamp(f, 0.0, 1.0)
+
+    # target number of nonzeros to keep
+    m = clamp(round(Int, f * n), 0, n)
+
+    T = eltype(A)
+
+    # compute threshold thr: keep the largest m values (>= thr)
+    thr = if m == 0
+        typemax(T)          # everything is < thr -> all zeroed
+    elseif m == n
+        typemin(T)          # nothing is < thr -> nothing zeroed
+    else
+        v = vec(copy(A))
+        k = n - m + 1        # k-th smallest is the cutoff
+        partialsort!(v, k)
+    end
+
+    # apply thresholding
+    @inbounds for i in eachindex(A)
+        if A[i] < thr
+            A[i] = zero(T)
+        end
+    end
+
+    achieved_pct_nonzero = 100 * count(!iszero, A) / n
+    return A, thr, achieved_pct_nonzero
 end

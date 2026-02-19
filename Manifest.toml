@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "aa3ff92d497f73f8386e9f0f080ff04a244563c6"
+project_hash = "8d92c08b73cd2849633c68c39a7bdbd99ef5d6f8"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f7304359109c768cf32dc5fa2d371565bb63b68a"
@@ -263,6 +263,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
 uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
 version = "1.0.1+0"
+
+[[deps.CSV]]
+deps = ["CodecZlib", "Dates", "FilePathsBase", "InlineStrings", "Mmap", "Parsers", "PooledArrays", "PrecompileTools", "SentinelArrays", "Tables", "Unicode", "WeakRefStrings", "WorkerUtilities"]
+git-tree-sha1 = "deddd8725e5e1cc49ee205a1964256043720a6c3"
+uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+version = "0.10.15"
 
 [[deps.Cairo]]
 deps = ["Cairo_jll", "Colors", "Glib_jll", "Graphics", "Libdl", "Pango_jll"]
@@ -1736,6 +1742,12 @@ version = "0.9.33"
     SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
     cuDNN = "02a925ec-e4fe-4b08-9a7e-0d78e3d38ccd"
 
+[[deps.NPZ]]
+deps = ["FileIO", "ZipFile"]
+git-tree-sha1 = "60a8e272fe0c5079363b28b0953831e2dd7b7e6f"
+uuid = "15e1cf62-19b3-5cfa-8e77-841668bca605"
+version = "0.4.3"
+
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
 git-tree-sha1 = "9b8215b1ee9e78a293f99797cd31375471b2bcae"
@@ -2643,6 +2655,12 @@ git-tree-sha1 = "96478df35bbc2f3e1e791bc7a3d0eeee559e60e9"
 uuid = "a2964d1f-97da-50d4-b82a-358c7fce9d89"
 version = "1.24.0+0"
 
+[[deps.WeakRefStrings]]
+deps = ["DataAPI", "InlineStrings", "Parsers"]
+git-tree-sha1 = "b1be2855ed9ed8eac54e5caff2afcdb442d52c23"
+uuid = "ea10d353-3f73-51f8-a26c-33c1cb351aa5"
+version = "1.4.2"
+
 [[deps.WebP]]
 deps = ["CEnum", "ColorTypes", "FileIO", "FixedPointNumbers", "ImageCore", "libwebp_jll"]
 git-tree-sha1 = "aa1ca3c47f119fbdae8770c29820e5e6119b83f2"
@@ -2660,6 +2678,11 @@ deps = ["LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "248a7031b3da79a127f14e5dc5f417e26f9f6db7"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "1.1.0"
+
+[[deps.WorkerUtilities]]
+git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
+uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
+version = "1.6.1"
 
 [[deps.XLSX]]
 deps = ["Artifacts", "Dates", "EzXML", "Printf", "Tables", "ZipArchives", "ZipFile"]
@@ -2877,7 +2900,7 @@ uuid = "700de1a5-db45-46bc-99cf-38207098b444"
 version = "0.2.7"
 
 [[deps.bind_RBM]]
-deps = ["AdvRBMs", "CairoMakie", "Clustering", "DataFrames", "Dates", "DelimitedFiles", "Distances", "Flux", "IJulia", "JLD2", "LIBSVM", "LinearAlgebra", "MLJ", "MLJLinearModels", "Makie", "Measures", "MultivariateStats", "Optim", "Pango_jll", "Printf", "PyCall", "PyPlot", "Random", "RestrictedBoltzmannMachines", "SequenceLogos", "Serialization", "SparseArrays", "Statistics", "StatsPlots", "XLSX"]
+deps = ["AdvRBMs", "Arpack", "CairoMakie", "Clustering", "DataFrames", "Dates", "DelimitedFiles", "Distances", "Flux", "IJulia", "JLD2", "LIBSVM", "LinearAlgebra", "MLJ", "MLJLinearModels", "Makie", "Measures", "MultivariateStats", "NPZ", "Optim", "Pango_jll", "Printf", "PyCall", "PyPlot", "Random", "RestrictedBoltzmannMachines", "SequenceLogos", "Serialization", "SparseArrays", "Statistics", "StatsPlots", "XLSX"]
 path = "."
 uuid = "b654bff8-ca72-46a9-9ffa-e55dbf73f8c2"
 version = "0.1.0"

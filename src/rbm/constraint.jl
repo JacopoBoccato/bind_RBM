@@ -33,7 +33,8 @@ Helpers to compute sequence-peptide interaction matrices Q_inter and Q_inter_cen
 function Q_inter(
     interaction_tensor::AbstractArray{T,3},
     split_idx::Int,
-    labels::AbstractVector{<:Real}
+    labels::AbstractVector{<:Real},
+    b::Float64
     ) where {T<:Real}
 
     a, n_amino, n_exp = size(interaction_tensor)
@@ -57,7 +58,8 @@ function Q_inter(
     acc_y   ./= n_exp
     acc_all ./= n_exp
 
-    return acc_y .- acc_all
+
+    return acc_y .- (acc_all ./ (1 + exp(b)))
 end
 
 function Q_inter_centered(

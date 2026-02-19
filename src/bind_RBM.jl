@@ -6,6 +6,7 @@ using AdvRBMs: calc_q, calc_Q
 using Flux
 using XLSX
 using JLD2
+using JLD2: @load, @save
 using LIBSVM
 using MLJ
 using Optim
@@ -13,6 +14,8 @@ using DataFrames: DataFrame, nrow
 using CairoMakie
 using SequenceLogos
 using PyPlot
+using DataFrames
+using CSV
 const split_idx = 81                     # PDZ length in positions inside the concatenated string
 const ALPHABET = "ACDEFGHIKLMNPQRSTVWY-"
 const alphabet = collect(ALPHABET)
@@ -28,5 +31,5 @@ include("classifier/utilities_classifier.jl")
 include("classifier/GaussianKernel.jl")
 include("specificity_helpers.jl")
 include("matrix_data.jl")
-
+include("data_gather.jl")
 end # module bind_RBM

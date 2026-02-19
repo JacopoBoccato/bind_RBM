@@ -732,7 +732,7 @@ end
 function plot_label_matrix(data::Dict{String, <:NamedTuple}, title::String="")
     M, keys_sorted, peptides_sorted = build_label_matrix(data)
 
-    fig = Figure(resolution = (1800, 1200))
+    fig = CairoMakie.Figure(resolution = (1800, 1200))
     ax  = Axis(
         fig[1, 1],
         title = title,
